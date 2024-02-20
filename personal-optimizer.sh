@@ -86,6 +86,22 @@ ufw_rules() {
   sleep 0.5
 }
 
+# Enabling UFW
+enable_ufw() {
+  echo 
+  yellow_msg 'Setting UFW Rules...'
+  echo 
+  sleep 0.5
+  
+  sudo systemctl enable ufw
+  echo "y" | sudo ufw enable
+
+  echo
+  green_msg 'UFW Rules Set.'
+  echo 
+  sleep 0.5
+}
+
 # Reboot
 reboot() {
   echo 
@@ -101,4 +117,5 @@ update_packages
 block_ir
 ufw_rules
 change_ssh_port
+enable_ufw
 reboot
