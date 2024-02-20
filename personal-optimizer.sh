@@ -61,7 +61,7 @@ change_ssh_port() {
   sleep 0.5
   
   sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bk
-  sodu echo "Port 1371" >> /etc/ssh/sshd_config
+  sudo echo "Port 1371" >> /etc/ssh/sshd_config
   sudo ufw allow 1371/tcp
   sudo service ssh restart
 
