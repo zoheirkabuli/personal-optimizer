@@ -45,7 +45,7 @@ block_ir() {
   echo 
   sleep 0.5
   
-  bash <(wget -qO- raw.githubusercontent.com/AliDbg/IPBAN/main/ipban.sh) -add OUTPUT -geoip IR -limit DROP
+  bash <(wget -qO- raw.githubusercontent.com/AliDbg/IPBAN/main/ipban.sh) -add OUTPUT -geoip IR -limit DROP -icmp NO
 
   echo
   green_msg 'Iran Blocked.'
@@ -62,11 +62,26 @@ change_ssh_port() {
   
   sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bk
   sudo echo "Port 1371" >> /etc/ssh/sshd_config
-  sudo ufw allow 1371/tcp
   sudo service ssh restart
 
   echo
   green_msg 'SSH Port Changed.'
+  echo 
+  sleep 0.5
+}
+
+# Caddy prerequisites
+caddy_prerequisites(){
+  echo 
+  yellow_msg 'Caddy prerequisites...'
+  echo 
+
+  sudo mkdir /home/tls
+  sudo mkdir -p /var/www/html
+  sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list && sudo apt update && sudo apt install caddy
+
+  echo
+  green_msg 'Caddy prerequisites installed.'
   echo 
   sleep 0.5
 }
@@ -115,7 +130,6 @@ reboot() {
 
 update_packages
 block_ir
-ufw_rules
 change_ssh_port
-enable_ufw
+caddy_prerequisites
 reboot
