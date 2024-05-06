@@ -80,6 +80,10 @@ caddy_prerequisites(){
   sudo mkdir -p /var/www/html
   sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list && sudo apt update && sudo apt install caddy
   sudo wget "https://raw.githubusercontent.com/zoheirkabuli/personal-optimizer/main/caddy.json"
+  sudo wget "https://github.com/zoheirkabuli/soon-site/releases/download/v1.0.4/web.zip"
+  unzip web.zip -d /var/www/html/
+  sudo mv /var/www/html/out/* /var/www/html/
+  sudo rm web.zip
 
   echo
   green_msg 'Caddy prerequisites installed.'
