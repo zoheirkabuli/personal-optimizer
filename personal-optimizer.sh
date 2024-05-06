@@ -31,6 +31,7 @@ update_packages() {
   sleep 0.5
   
   sudo apt update && sudo apt upgrade -y
+  sudo apt install unzip
 
   echo
   green_msg 'Packages Updated.'
@@ -99,7 +100,7 @@ ufw_rules() {
   echo 
   sleep 0.5
 
-  sudo ufw allow http  && sudo ufw allow https && sudo ufw allow 8443 && sudo ufw allow 8443/udp
+  sudo ufw allow http  && sudo ufw allow https && sudo ufw allow 8443 && sudo ufw allow 8443/udp && sudo ufw allow 2096
 
   echo
   green_msg 'UFW Rules Set.'
