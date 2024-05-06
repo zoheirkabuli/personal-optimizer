@@ -62,7 +62,8 @@ change_ssh_port() {
   
   sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bk
   sudo echo "Port 1371" >> /etc/ssh/sshd_config
-  sudo service ssh restart
+  sudo ufw allow 1371/tcp
+  sudo systemctl restart sshd
 
   echo
   green_msg 'SSH Port Changed.'
@@ -100,6 +101,8 @@ ufw_rules() {
   
   sudo ufw allow 21 && sudo ufw allow 21/udp && sudo ufw allow 80 && sudo ufw allow 80/udp && sudo ufw allow 8080 && sudo ufw allow 8080/udp && sudo ufw allow 443 && sudo ufw allow 443/udp && sudo ufw allow 2053 && sudo ufw allow 2053/udp && sudo ufw allow 2083 && sudo ufw allow 2083/udp && sudo ufw allow 2087 && sudo ufw allow 2087/udp && sudo ufw allow 2096 && sudo ufw allow 2096/udp && sudo ufw allow 8443 && sudo ufw allow 8443/udp
 
+  sudo ufw allow http  && sudo ufw allow https && sudo ufw allow 8443 && sudo ufw allow 8443/udp
+
   echo
   green_msg 'UFW Rules Set.'
   echo 
@@ -134,7 +137,8 @@ reboot() {
 
 
 update_packages
-block_ir
-change_ssh_port
 caddy_prerequisites
+change_ssh_port
+ufw_rules
+enable_ufw
 reboot
