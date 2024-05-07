@@ -78,7 +78,7 @@
     },
     "tls": {
       "certificates": {
-        "automate": ["domain.com"]
+        "automate": ["my.domain.com"]
       },
       "automation": {
         "policies": [
