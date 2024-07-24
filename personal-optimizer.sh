@@ -136,6 +136,7 @@ reboot() {
 
 
 update_packages
+caddy_prerequisites
 change_ssh_port
 ufw_rules
 enable_ufw
