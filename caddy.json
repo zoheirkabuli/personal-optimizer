@@ -99,9 +99,7 @@
           {
             "issuers": [
               {
-                "module": "acme",
-                "ca": "https://acme.zerossl.com/v2/DV90",
-                "email": "z.kabuli@yaama.tech"
+                "module": "acme"
               }
             ]
           }
