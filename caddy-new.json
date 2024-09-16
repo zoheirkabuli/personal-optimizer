@@ -10,12 +10,23 @@
       "default": {
         "writer": {
           "output": "file",
-          "filename": "/var/log/caddy/default.log"
+          "filename": "/var/log/caddy/error.log"
         },
         "encoder": {
           "format": "console"
         },
-        "level": "WARN"
+        "level": "ERROR",
+        "exclude": ["http.log.access.log0"]
+      },
+      "log0": {
+        "writer": {
+          "output": "file",
+          "filename": "/var/log/caddy/access.log"
+        },
+        "encoder": {
+          "format": "console"
+        },
+        "include": ["http.log.access.log0"]
       }
     }
   },
@@ -46,7 +57,7 @@
           "protocols": ["h1"]
         },
         "srvh2c": {
-          "listen": ["127.0.0.1:88"],
+          "listen": ["unix/@uds88.sock"],
           "listener_wrappers": [
             {
               "wrapper": "proxy_protocol"
@@ -72,6 +83,9 @@
               ]
             }
           ],
+          "logs": {
+            "default_logger_name": "log0"
+          },
           "protocols": ["h1", "h2c"]
         }
       }

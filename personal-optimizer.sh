@@ -100,7 +100,7 @@ ufw_rules() {
   echo 
   sleep 0.5
 
-  sudo ufw allow http  && sudo ufw allow https && sudo ufw allow 443/udp && sudo ufw allow 8443 && sudo ufw allow 8443/udp && sudo ufw allow 2053 && sudo ufw allow 2096
+  sudo ufw allow http  && sudo ufw allow https && sudo ufw allow 8443 && sudo ufw allow 8443/udp && sudo ufw allow 2053 && sudo ufw allow 2096
 
   echo
   green_msg 'UFW Rules Set.'
