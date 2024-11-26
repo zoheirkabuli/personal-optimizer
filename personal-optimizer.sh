@@ -43,7 +43,7 @@ while getopts "e:d:" opt; do
 done
 
 # Check if the domain is provided
-if [ -z "$email" || -z "$domain" ]; then
+if [[ -z "$email" || -z "$domain" ]]; then
   echo "Error: Both -e (email) and -d (domain) flags are required."
   usage
 fi
@@ -177,7 +177,7 @@ reboot() {
 
 update_packages
 change_ssh_port
-
+get_ssl
 install_nginx
 nginx_prerequisites
 dns_configuration
