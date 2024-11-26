@@ -1,26 +1,52 @@
 #!/bin/bash
 
-
 clear
 
 # Green, Yellow & Red Messages.
 green_msg() {
-    tput setaf 2
-    echo "[*] ----- $1"
-    tput sgr0
+  tput setaf 2
+  echo "[*] ----- $1"
+  tput sgr0
 }
 
 yellow_msg() {
-    tput setaf 3
-    echo "[*] ----- $1"
-    tput sgr0
+  tput setaf 3
+  echo "[*] ----- $1"
+  tput sgr0
 }
 
 red_msg() {
-    tput setaf 1
-    echo "[*] ----- $1"
-    tput sgr0
+  tput setaf 1
+  echo "[*] ----- $1"
+  tput sgr0
 }
+
+# Function to display usage
+usage() {
+  echo "Usage: $0 -e <email> -d <domain>"
+  exit 1
+}
+
+# Parse flags
+while getopts "e:d:" opt; do
+  case ${opt} in
+    e)
+      email=$OPTARG
+      ;;
+    d)
+      domain=$OPTARG
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+
+# Check if the domain is provided
+if [ -z "$email" || -z "$domain" ]; then
+  echo "Error: Both -e (email) and -d (domain) flags are required."
+  usage
+fi
 
 
 # Update Packages
@@ -29,9 +55,9 @@ update_packages() {
   yellow_msg 'Updating Packages...'
   echo 
   sleep 0.5
-  
+
   sudo apt update && sudo apt upgrade -y
-  sudo apt install unzip
+  sudo apt install unzip -y
 
   echo
   green_msg 'Packages Updated.'
@@ -39,17 +65,43 @@ update_packages() {
   sleep 0.5
 }
 
-# Blocking IR 
-block_ir() {
+# Get SSL
+get_ssl() {
   echo 
-  yellow_msg 'Blocking Iran...'
+  yellow_msg 'Getting SSL...'
   echo 
   sleep 0.5
-  
-  bash <(wget -qO- raw.githubusercontent.com/AliDbg/IPBAN/main/ipban.sh) -add OUTPUT -geoip IR -limit DROP -icmp NO
+
+  sudo bash -c "$(curl -sL https://raw.githubusercontent.com/erfjab/ESSL/master/essl.sh)" @ --install
+  essl "$email" "$domain" /certs/
 
   echo
-  green_msg 'Iran Blocked.'
+  green_msg 'Getting SSL finished.'
+  echo 
+  sleep 0.5
+}
+
+# Install NGINX
+install_nginx() {
+  echo 
+  yellow_msg 'Installing NGINX...'
+  echo 
+  sleep 0.5
+
+  sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring
+  curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+  gpg --dry-run --quiet --no-keyring --import --import-options import-show /usr/share/keyrings/nginx-archive-keyring.gpg
+  echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+  http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
+    | sudo tee /etc/apt/sources.list.d/nginx.list
+  echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" \
+    | sudo tee /etc/apt/preferences.d/99nginx
+  sudo apt update
+  sudo apt install nginx -y
+
+  echo
+  green_msg 'NGINX Installed.'
   echo 
   sleep 0.5
 }
@@ -72,56 +124,41 @@ change_ssh_port() {
   sleep 0.5
 }
 
-# Caddy prerequisites
-caddy_prerequisites(){
+# Nginx prerequisites
+nginx_prerequisites(){
   echo 
-  yellow_msg 'Caddy prerequisites...'
+  yellow_msg 'Nginx prerequisites...'
   echo 
 
-  sudo mkdir /home/tls
   sudo mkdir -p /var/www/html
-  sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list && sudo apt update && sudo apt install caddy
-  sudo wget "https://raw.githubusercontent.com/zoheirkabuli/personal-optimizer/main/caddy.json"
   sudo wget "https://github.com/zoheirkabuli/soon-site/releases/download/v1.0.4/web.zip"
   unzip web.zip -d /var/www/html/
   sudo mv /var/www/html/out/* /var/www/html/
   sudo rm web.zip
 
   echo
-  green_msg 'Caddy prerequisites installed.'
+  green_msg 'Nginx prerequisites installed.'
   echo 
   sleep 0.5
 }
 
-# UFW Rules
-ufw_rules() {
-  echo 
-  yellow_msg 'Setting UFW Rules...'
-  echo 
-  sleep 0.5
+# DNS Configuration
+dns_configuration() {
+    # Remove the /etc/resolv.conf file
+    rm -f /etc/resolv.conf
 
-  sudo ufw allow http  && sudo ufw allow https && sudo ufw allow 8443 && sudo ufw allow 8443/udp && sudo ufw allow 2053 && sudo ufw allow 2096
+    # Create a new /etc/resolv.conf file with the specified data
+    cat <<EOF > /etc/resolv.conf
+nameserver 1.1.1.1
+nameserver 1.0.0.1
+nameserver 2606:4700:4700::1111
+nameserver 2606:4700:4700::1001
+EOF
 
-  echo
-  green_msg 'UFW Rules Set.'
-  echo 
-  sleep 0.5
-}
+    # Make /etc/resolv.conf immutable
+    chattr +i /etc/resolv.conf
 
-# Enabling UFW
-enable_ufw() {
-  echo 
-  yellow_msg 'Setting UFW Rules...'
-  echo 
-  sleep 0.5
-  
-  sudo systemctl enable ufw
-  echo "y" | sudo ufw enable
-
-  echo
-  green_msg 'UFW Rules Set.'
-  echo 
-  sleep 0.5
+    echo "DNS configuration updated and locked successfully."
 }
 
 # Reboot
@@ -135,9 +172,11 @@ reboot() {
 }
 
 
+
 update_packages
-caddy_prerequisites
 change_ssh_port
-ufw_rules
-enable_ufw
+
+install_nginx
+nginx_prerequisites
+dns_configuration
 reboot
