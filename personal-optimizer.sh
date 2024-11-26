@@ -135,6 +135,8 @@ nginx_prerequisites(){
   unzip web.zip -d /var/www/html/
   sudo mv /var/www/html/out/* /var/www/html/
   sudo rm web.zip
+  rm -f /etc/nginx/conf.d/default.conf
+  curl -fsSL "https://raw.githubusercontent.com/zoheirkabuli/personal-optimizer/refs/heads/main/nginx.conf" -o "/etc/nginx/conf.d/default.conf"
 
   echo
   green_msg 'Nginx prerequisites installed.'
